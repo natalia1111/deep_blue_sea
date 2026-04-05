@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Глубокое синее море — Артефактология</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:      #1a6fa8;
+    --blue-lt:   #3da5d9;
+    --blue-pale: #a8d8f0;
+    --blue-dk:   #0d4a72;
+    --ice:       #e8f6fd;
+    --sky-bg:    #f0f8ff;
+    --frost:     #d6eef8;
+    --deep:      #0a2d47;
+    --text:      #0d2f45;
+    --card-bg:   #f7fbff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: linear-gradient(160deg, #e8f4fd 0%, #f0f9ff 55%, #d9eef9 100%);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 18% 18%, rgba(26,111,168,0.08) 0%, transparent 44%),
+      radial-gradient(circle at 80% 68%, rgba(13,74,114,0.06) 0%, transparent 42%),
+      radial-gradient(circle at 50% 50%, rgba(61,165,217,0.04) 0%, transparent 58%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .container {
+    max-width: 780px; margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .header { text-align: center; margin-bottom: 60px; animation: fadeDown 1s ease both; }
+  .header-label {
+    font-size: 11px; letter-spacing: 6px; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 12px; font-weight: 300;
+  }
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(24px, 5vw, 48px);
+    font-weight: 700; line-height: 1.12;
+    color: var(--deep);
+    text-shadow: 0 0 50px rgba(26,111,168,0.25);
+  }
+  .header h1 span { color: var(--blue-lt); }
+  .header-divider {
+    width: 140px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue-pale), transparent);
+    margin: 20px auto;
+  }
+  .header p { font-size: 16px; color: var(--blue); font-style: italic; letter-spacing: 1px; }
+  .header-icon {
+    font-size: 38px; margin-bottom: 12px;
+    filter: drop-shadow(0 0 10px rgba(26,111,168,0.5));
+    animation: pulse-shark 3s ease-in-out infinite;
+  }
+  @keyframes pulse-shark { 0%,100%{transform:scale(1) rotate(-2deg)} 50%{transform:scale(1.08) rotate(2deg)} }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    width:100%; height:2px; background:var(--frost);
+    border-radius:2px; margin-bottom:50px; overflow:hidden;
+  }
+  .progress-fill {
+    height:100%;
+    background: linear-gradient(90deg, var(--deep), var(--blue-lt));
+    transition: width .6s ease;
+    box-shadow: 0 0 8px var(--blue-lt);
+  }
+  .progress-text {
+    text-align:center; font-size:12px; letter-spacing:4px;
+    color:var(--blue); margin-bottom:30px; text-transform:uppercase;
+  }
+
+  /* ── SCORE DOTS ── */
+  .score-bar { display:flex; justify-content:center; gap:8px; margin:20px 0; }
+  .score-dot {
+    width:10px; height:10px; border-radius:50%;
+    background:var(--frost);
+    border:1px solid rgba(26,111,168,0.3);
+    transition: background .4s, box-shadow .4s;
+  }
+  .score-dot.correct { background:var(--blue-lt); box-shadow:0 0 8px var(--blue-lt); }
+  .score-dot.wrong   { background:#7f8c8d; }
+
+  /* ── QUESTION CARD ── */
+  .question-card {
+    background: var(--card-bg);
+    border: 2px solid var(--blue-pale);
+    border-radius: 6px; padding: 40px;
+    margin-bottom: 24px;
+    animation: fadeUp .6s ease both;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 28px rgba(26,111,168,0.08);
+  }
+  .question-card::before {
+    content:''; position:absolute;
+    top:0; left:0; right:0; height:2px;
+    background: linear-gradient(90deg, transparent, var(--blue-lt), transparent);
+  }
+  .q-number {
+    font-size:11px; letter-spacing:5px;
+    color:var(--blue); text-transform:uppercase;
+    margin-bottom:16px; display:block;
+  }
+  .q-text {
+    font-size:clamp(17px,2.5vw,21px); line-height:1.65;
+    color:var(--text); margin-bottom:28px; font-weight:300;
+  }
+  .q-hint { font-size:13px; color:var(--blue); font-style:italic; margin-bottom:24px; }
+
+  /* ── FACT BOX ── */
+  .fact-box {
+    background: linear-gradient(135deg, #e8f4fd, #f0f9ff);
+    border-left: 3px solid var(--blue-pale);
+    border-radius: 0 4px 4px 0;
+    padding: 14px 18px; margin-bottom: 20px;
+    font-size: 14px; color: var(--blue-dk); line-height: 1.65;
+  }
+  .fact-box strong { color: var(--deep); }
+
+  /* ── INPUT ── */
+  .text-input {
+    width:100%; background:var(--ice);
+    border:1px solid var(--blue-pale); border-radius:4px;
+    padding:14px 18px; color:var(--text);
+    font-family:'Cormorant Garamond',serif; font-size:18px;
+    outline:none; transition:border-color .3s, box-shadow .3s;
+    margin-bottom:16px;
+  }
+  .text-input:focus {
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(26,111,168,0.13);
+  }
+  .text-input::placeholder { color:#8bbcd9; font-style:italic; }
+
+  /* ── DRAG ── */
+  .drag-list { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .drag-item {
+    background:var(--frost); border:1px solid var(--blue-pale);
+    color:var(--text); border-radius:4px; padding:14px 18px;
+    cursor:grab; display:flex; align-items:center; gap:14px;
+    transition:all .2s; user-select:none; font-size:16px;
+  }
+  .drag-item:active { cursor:grabbing; }
+  .drag-item.dragging { opacity:.45; box-shadow:0 0 20px rgba(26,111,168,0.3); }
+  .drag-item.drag-over { border-color:var(--blue); background:rgba(61,165,217,0.12); }
+  .drag-handle { font-size:14px; color:var(--blue-pale); flex-shrink:0; }
+  .drag-rank {
+    width:28px; height:28px; border:1px solid var(--blue);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:var(--blue); flex-shrink:0;
+  }
+
+  /* ── CHOICE ── */
+  .choice-list { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .choice-btn {
+    background:var(--frost); border:1px solid var(--blue-pale);
+    color:var(--text); border-radius:4px; padding:14px 20px;
+    font-family:'Cormorant Garamond',serif; font-size:17px;
+    cursor:pointer; text-align:left; transition:all .2s;
+  }
+  .choice-btn:hover:not(:disabled) {
+    background:#c2e4f5; border-color:var(--blue); transform:translateX(4px);
+  }
+  .choice-btn.selected-correct { background:rgba(39,174,96,.12); border-color:#27ae60; color:#1a5c35; cursor:default; }
+  .choice-btn.selected-wrong   { background:rgba(127,140,141,.09); border-color:#95a5a6; color:#4a4a4a; cursor:default; }
+  .choice-btn.reveal-correct   { background:rgba(39,174,96,.07); border-color:#82e0aa; color:#1d6a3a; cursor:default; }
+  .choice-btn:disabled { cursor:default; }
+
+  /* ── WORD MATCH ── */
+  .word-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; margin-bottom:20px;
+  }
+  @media(max-width:520px){ .word-grid{ grid-template-columns:1fr; } }
+  .word-pair {
+    background:var(--frost); border:1px solid var(--blue-pale);
+    border-radius:4px; padding:12px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .word-main { font-size:16px; font-weight:600; color:var(--deep); }
+  .word-select {
+    background:#fff; border:1px solid var(--blue-pale);
+    border-radius:3px; padding:7px 10px;
+    font-family:'Cormorant Garamond',serif; font-size:15px;
+    color:var(--text); outline:none;
+  }
+  .word-select:focus { border-color:var(--blue); }
+
+  /* ── ALGO STEPS ── */
+  .algo-list { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+  .algo-step {
+    background:var(--frost); border:1px solid var(--blue-pale);
+    border-radius:4px; padding:12px 18px;
+    display:flex; align-items:center; gap:12px;
+    cursor:grab; user-select:none; transition:all .2s;
+  }
+  .algo-step.dragging { opacity:.45; }
+  .algo-step.drag-over { border-color:var(--blue); background:rgba(61,165,217,0.12); }
+  .algo-num {
+    width:28px; height:28px; border:1px solid var(--blue);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:var(--blue); flex-shrink:0;
+  }
+  .algo-text { font-size:15px; line-height:1.4; }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    padding:14px 20px; border-radius:4px;
+    font-size:15px; line-height:1.65;
+    margin-top:10px; display:none;
+    animation:fadeUp .3s ease both;
+  }
+  .feedback.correct { background:rgba(39,174,96,.09); border:1px solid rgba(39,174,96,.3); color:#1a5c35; display:block; }
+  .feedback.wrong   { background:rgba(127,140,141,.08); border:1px solid rgba(127,140,141,.3); color:#4a4a4a; display:block; }
+
+  /* ── BUTTON ── */
+  .btn {
+    background:linear-gradient(135deg, var(--deep), var(--blue));
+    color:#fff; border:none; padding:14px 36px;
+    font-family:'Cormorant Garamond',serif; font-size:15px;
+    letter-spacing:3px; text-transform:uppercase;
+    cursor:pointer; border-radius:3px;
+    transition:all .3s; margin-top:16px;
+  }
+  .btn:hover {
+    background:linear-gradient(135deg, var(--blue), var(--blue-lt));
+    box-shadow:0 4px 20px rgba(26,111,168,0.38);
+    transform:translateY(-1px);
+  }
+
+  /* ── RESULT ── */
+  #result-screen { display:none; animation:fadeUp .8s ease both; }
+  .result-card {
+    background:var(--card-bg);
+    border:2px solid var(--blue-pale); border-radius:8px;
+    padding:48px 40px; text-align:center;
+    box-shadow:0 8px 48px rgba(26,111,168,0.12);
+    position:relative; overflow:hidden;
+  }
+  .result-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--deep), var(--blue-lt), var(--blue-pale), var(--blue-lt), var(--deep));
+    background-size:200% 100%;
+    animation:gradMove 3s linear infinite;
+  }
+  @keyframes gradMove { 0%{background-position:0%} 100%{background-position:200%} }
+  .result-icon {
+    font-size:64px; margin-bottom:20px;
+    filter:drop-shadow(0 0 12px rgba(26,111,168,0.5));
+    animation:pulseR 2.2s ease-in-out infinite;
+  }
+  @keyframes pulseR { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  .result-title { font-family:'Cinzel',serif; font-size:clamp(22px,4vw,34px); color:var(--deep); margin-bottom:10px; }
+  .result-divider { width:80px; height:1px; background:linear-gradient(90deg,transparent,var(--blue-lt),transparent); margin:20px auto; }
+  .result-percent {
+    font-family:'Cinzel',serif;
+    font-size:clamp(52px,10vw,82px); color:var(--blue-lt);
+    text-shadow:0 0 30px rgba(26,111,168,0.4);
+    line-height:1; margin-bottom:8px;
+  }
+  .result-label { font-size:13px; letter-spacing:4px; text-transform:uppercase; color:var(--blue); margin-bottom:8px; }
+  .result-score { font-size:20px; color:var(--deep); margin-bottom:20px; letter-spacing:2px; }
+  .result-message { font-size:17px; color:var(--blue-dk); line-height:1.7; margin-bottom:36px; font-style:italic; }
+
+  /* ── SHARE ── */
+  .share-section {
+    margin-top:36px; padding:28px;
+    background:linear-gradient(135deg, #e8f4fd, #f0f9ff);
+    border:1px solid rgba(61,165,217,0.28); border-radius:6px;
+  }
+  .share-section p { font-size:14px; color:var(--blue); margin-bottom:14px; letter-spacing:1px; font-style:italic; }
+  .name-input-wrap { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:16px; }
+  .name-input-wrap input {
+    background:#fff; border:1px solid rgba(26,111,168,0.28);
+    border-radius:4px; padding:12px 16px;
+    color:var(--text); font-family:'Cormorant Garamond',serif;
+    font-size:18px; outline:none; flex:1; min-width:140px;
+    transition:border-color .3s;
+  }
+  .name-input-wrap input:focus { border-color:var(--blue-lt); }
+  .name-input-wrap input::placeholder { color:#8bbcd9; font-style:italic; }
+  #cert-canvas { width:100%; border-radius:6px; display:block; box-shadow:0 12px 60px rgba(26,111,168,0.18); margin-top:20px; }
+  .share-btns { display:flex; gap:12px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+  .btn-download { background:linear-gradient(135deg,#1b5e20,#388e3c); color:#fff; }
+  .btn-download:hover { background:linear-gradient(135deg,#388e3c,#66bb6a); color:#fff; }
+  .btn-tg { background:linear-gradient(135deg,#0d4a72,#1a6fa8); color:#fff; }
+  .btn-tg:hover { background:linear-gradient(135deg,#1a6fa8,#3da5d9); color:#fff; }
+
+  /* ── ANIM ── */
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+
+  @media(max-width:600px){
+    .question-card{padding:24px 18px}
+    .container{padding:24px 14px 60px}
+    .result-card{padding:32px 20px}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon">🦈</div>
+    <div class="header-label">Кинематографическая Артефактология</div>
+    <h1>«<span>Глубокое синее море</span>»<br>vs Реальная наука</h1>
+    <div class="header-divider"></div>
+    <p>Акулы умнее, чем ты думаешь — проверь себя</p>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen">
+    <div class="progress-text" id="progress-text">Вопрос 1 из 5</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+    <div class="score-bar">
+      <div class="score-dot" id="dot-0"></div>
+      <div class="score-dot" id="dot-1"></div>
+      <div class="score-dot" id="dot-2"></div>
+      <div class="score-dot" id="dot-3"></div>
+      <div class="score-dot" id="dot-4"></div>
+    </div>
+
+    <!-- Q1: Реакции акул -->
+    <div class="question-card" id="q1">
+      <span class="q-number">Вопрос 01 — Биология акул</span>
+      <p class="q-text">В фильме акулы-мако демонстрируют невероятный интеллект. Распредели характеристики акул по двум группам: какие из них реально существуют у акул, а какие — художественный вымысел?</p>
+      <p class="q-hint">Выбери правильное распределение</p>
+      <div class="choice-list" id="q1-choices">
+        <button class="choice-btn" onclick="checkQ1(this,false)">А) Реальные: планирование охоты, использование инструментов. Вымысел: электрорецепция, боковая линия</button>
+        <button class="choice-btn" onclick="checkQ1(this,true)">Б) Реальные: электрорецепция (ампулы Лоренцини), боковая линия, социальная охота. Вымысел: уровень интеллекта, сравнимый с приматами</button>
+        <button class="choice-btn" onclick="checkQ1(this,false)">В) Все характеристики реальны — акулы действительно способны обучаться на уровне дельфинов</button>
+        <button class="choice-btn" onclick="checkQ1(this,false)">Г) Реальные: острое зрение под водой. Вымысел: электрорецепция и боковая линия</button>
+      </div>
+      <div class="feedback" id="q1-feedback"></div>
+    </div>
+
+    <!-- Q2: Атмосфера сцены — drag -->
+    <div class="question-card" id="q2" style="display:none">
+      <span class="q-number">Вопрос 02 — Язык кино</span>
+      <p class="q-text">Расставь ключевые слова, описывающие атмосферу первой подводной атаки акулы, по убыванию эмоциональной интенсивности — от самого сильного к самому слабому.</p>
+      <p class="q-hint">⠿ Перетаскивай — 1 сверху = самое интенсивное</p>
+      <div class="drag-list" id="drag-list">
+        <div class="drag-item" draggable="true" data-id="terror">
+          <span class="drag-handle">⠿</span><span class="drag-rank" id="rank-terror">?</span>
+          <span><strong>Ужас</strong> — стремительная атака из глубины</span>
+        </div>
+        <div class="drag-item" draggable="true" data-id="claustro">
+          <span class="drag-handle">⠿</span><span class="drag-rank" id="rank-claustro">?</span>
+          <span><strong>Клаустрофобия</strong> — герои заперты под водой</span>
+        </div>
+        <div class="drag-item" draggable="true" data-id="tension">
+          <span class="drag-handle">⠿</span><span class="drag-rank" id="rank-tension">?</span>
+          <span><strong>Напряжение</strong> — тихая вода скрывает опасность</span>
+        </div>
+        <div class="drag-item" draggable="true" data-id="dread">
+          <span class="drag-handle">⠿</span><span class="drag-rank" id="rank-dread">?</span>
+          <span><strong>Предчувствие</strong> — силуэт в мутной воде</span>
+        </div>
+      </div>
+      <div class="feedback" id="q2-feedback"></div>
+      <button class="btn" onclick="checkQ2()">Проверить →</button>
+    </div>
+
+    <!-- Q3: Скорость акулы -->
+    <div class="question-card" id="q3" style="display:none">
+      <span class="q-number">Вопрос 03 — Физика погони</span>
+      <p class="q-text">Акула-мако преследует лодку длиной 6 м. Лодка движется со скоростью 12 м/с. Акула преодолевает 50 м за 4 секунды. Успеет ли акула догнать лодку, и какова её скорость в км/ч?</p>
+      <p class="q-hint">Введи скорость акулы в км/ч (целое число)</p>
+      <div class="fact-box">🦈 <strong>Формула:</strong> v = s ÷ t (скорость = расстояние ÷ время). 50 м ÷ 4 с = 12,5 м/с → перевод в км/ч: × 3,6</div>
+      <input class="text-input" id="q3-input" placeholder="например: 45" type="text" />
+      <div class="feedback" id="q3-feedback"></div>
+      <button class="btn" onclick="checkQ3()">Проверить →</button>
+    </div>
+
+    <!-- Q4: Сравнение с дельфином -->
+    <div class="question-card" id="q4" style="display:none">
+      <span class="q-number">Вопрос 04 — Акула vs Дельфин</span>
+      <p class="q-text">Скорость акулы-мако ≈ 45 км/ч. Дельфин-афалина развивает до 55 км/ч. В фильме акулы показаны умнее дельфинов. Выбери правильный вывод о реальном соотношении.</p>
+      <p class="q-hint">Выбери один вариант</p>
+      <div class="choice-list" id="q4-choices">
+        <button class="choice-btn" onclick="checkQ4(this,false)">А) Акулы и дельфины равны по скорости и интеллекту — фильм точен</button>
+        <button class="choice-btn" onclick="checkQ4(this,false)">Б) Акулы быстрее дельфинов — поэтому они умнее по логике эволюции</button>
+        <button class="choice-btn" onclick="checkQ4(this,true)">В) Дельфины незначительно быстрее акул (~55 vs 45 км/ч), но значительно умнее — мозг дельфина крупнее и сложнее. Фильм преувеличивает интеллект акул</button>
+        <button class="choice-btn" onclick="checkQ4(this,false)">Г) Скорость не связана с интеллектом, поэтому данных недостаточно для вывода</button>
+      </div>
+      <div class="feedback" id="q4-feedback"></div>
+    </div>
+
+    <!-- Q5: Алгоритм эвакуации -->
+    <div class="question-card" id="q5" style="display:none">
+      <span class="q-number">Вопрос 05 — Алгоритм выживания</span>
+      <p class="q-text">Расставь шаги алгоритма приложения «Безопасность в акульих водах» в правильном логическом порядке — от обнаружения угрозы до действий пользователя.</p>
+      <p class="q-hint">⠿ Перетаскивай — 1 сверху = первый шаг алгоритма</p>
+      <div class="algo-list" id="algo-list">
+        <div class="algo-step" draggable="true" data-id="detect">
+          <span class="drag-handle">⠿</span><span class="algo-num" id="anum-detect">?</span>
+          <span class="algo-text">🔵 Обнаружение акулы через сонар и подводные камеры</span>
+        </div>
+        <div class="algo-step" draggable="true" data-id="size">
+          <span class="drag-handle">⠿</span><span class="algo-num" id="anum-size">?</span>
+          <span class="algo-text">📏 Оценка размера и вида акулы по видеоизображению</span>
+        </div>
+        <div class="algo-step" draggable="true" data-id="distance">
+          <span class="drag-handle">⠿</span><span class="algo-num" id="anum-distance">?</span>
+          <span class="algo-text">📍 Расчёт расстояния и скорости сближения акулы</span>
+        </div>
+        <div class="algo-step" draggable="true" data-id="alert">
+          <span class="drag-handle">⠿</span><span class="algo-num" id="anum-alert">?</span>
+          <span class="algo-text">🔔 Оповещение пользователей: сирена, вибрация, карта</span>
+        </div>
+        <div class="algo-step" draggable="true" data-id="escape">
+          <span class="drag-handle">⠿</span><span class="algo-num" id="anum-escape">?</span>
+          <span class="algo-text">🏃 Указание маршрута эвакуации подальше от воды</span>
+        </div>
+      </div>
+      <div class="feedback" id="q5-feedback"></div>
+      <button class="btn" onclick="checkQ5()">Проверить →</button>
+    </div>
+
+  </div><!-- /quiz-screen -->
+
+  <!-- RESULT -->
+  <div id="result-screen">
+    <div class="result-card">
+      <div class="result-icon" id="result-emoji">🦈</div>
+      <div class="result-title" id="result-title">Тест пройден</div>
+      <div class="result-divider"></div>
+      <div class="result-percent" id="result-percent">0%</div>
+      <div class="result-label">верных ответов</div>
+      <div class="result-score" id="result-score"></div>
+      <div class="result-message" id="result-message"></div>
+
+      <div class="share-section">
+        <p>Введи своё имя — получи сертификат выжившего в глубине</p>
+        <div class="name-input-wrap">
+          <input type="text" id="name-first" placeholder="Имя"     oninput="updateCanvas()" />
+          <input type="text" id="name-last"  placeholder="Фамилия" oninput="updateCanvas()" />
+        </div>
+        <canvas id="cert-canvas"></canvas>
+        <div class="share-btns">
+          <button class="btn btn-download" onclick="downloadImg()">⬇ Сохранить</button>
+          <button class="btn btn-tg"       onclick="shareToTelegram()">✈ Поделиться</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── STATE ──
+const TOTAL = 5;
+let score   = [null,null,null,null,null];
+
+// ── HELPERS ──
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' ').replace(/,/g,'.'); }
+function showFeedback(id,correct,msg){
+  const el=document.getElementById(id);
+  el.innerHTML=(correct?'✓ ':'✗ ')+msg;
+  el.className='feedback '+(correct?'correct':'wrong');
+  el.style.display='block';
+}
+function markDot(idx,correct){
+  score[idx]=correct;
+  document.getElementById('dot-'+idx).classList.add(correct?'correct':'wrong');
+}
+function goNext(qIdx){
+  const next=qIdx+2;
+  const pct=Math.round((next/TOTAL)*100);
+  document.getElementById('progress-fill').style.width=Math.min(pct,100)+'%';
+  document.getElementById('progress-text').textContent='Вопрос '+(next>TOTAL?TOTAL:next)+' из '+TOTAL;
+  setTimeout(()=>{
+    if(next<=TOTAL){
+      const card=document.getElementById('q'+next);
+      card.style.display='block';
+      card.scrollIntoView({behavior:'smooth',block:'start'});
+    } else showResult();
+  },1400);
+}
+
+// ── Q1: CHOICE ──
+function checkQ1(btn,isCorrect){
+  document.querySelectorAll('#q1-choices .choice-btn').forEach(b=>b.disabled=true);
+  if(isCorrect){
+    btn.classList.add('selected-correct');
+    showFeedback('q1-feedback',true,
+      'Верно! Ампулы Лоренцини — реальный электрорецепторный орган акул, позволяющий чувствовать электрические поля на несколько метров. Боковая линия воспринимает колебания воды. Групповая охота зафиксирована у некоторых видов. Однако разум уровня приматов — художественный вымысел. Интеллект акул соответствует примерно уровню рыб.');
+    markDot(0,true);
+  } else {
+    btn.classList.add('selected-wrong');
+    document.querySelectorAll('#q1-choices .choice-btn').forEach(b=>{
+      if(b.getAttribute('onclick').includes('true')) b.classList.add('reveal-correct');
+    });
+    showFeedback('q1-feedback',false,
+      'Не верно. Электрорецепция через ампулы Лоренцини и боковая линия — реальные органы акул. Социальная охота также зафиксирована у некоторых видов. Но когнитивные способности уровня приматов — это фантастика фильма.');
+    markDot(0,false);
+  }
+  goNext(0);
+}
+
+// ── Q2: DRAG — Правильный порядок: ужас → клаустрофобия → напряжение → предчувствие ──
+const CORRECT_Q2=['terror','claustro','tension','dread'];
+function initDrag(){
+  setupDragList('drag-list', ()=>{
+    document.querySelectorAll('#drag-list .drag-item').forEach((item,i)=>{
+      const r=document.getElementById('rank-'+item.dataset.id);
+      if(r) r.textContent=i+1;
+    });
+  });
+  setupDragList('algo-list', ()=>{
+    document.querySelectorAll('#algo-list .algo-step').forEach((item,i)=>{
+      const r=document.getElementById('anum-'+item.dataset.id);
+      if(r) r.textContent=i+1;
+    });
+  });
+}
+function setupDragList(listId, onUpdate){
+  const list=document.getElementById(listId);
+  if(!list) return;
+  let src=null;
+  list.querySelectorAll('[draggable="true"]').forEach(item=>{
+    item.addEventListener('dragstart',e=>{src=item;setTimeout(()=>item.classList.add('dragging'),0);});
+    item.addEventListener('dragend',()=>{item.classList.remove('dragging');onUpdate();});
+    item.addEventListener('dragover',e=>{e.preventDefault();item.classList.add('drag-over');});
+    item.addEventListener('dragleave',()=>item.classList.remove('drag-over'));
+    item.addEventListener('drop',e=>{
+      e.preventDefault();item.classList.remove('drag-over');
+      if(src&&src!==item){
+        const items=[...list.querySelectorAll('[draggable="true"]')];
+        const si=items.indexOf(src),ti=items.indexOf(item);
+        if(si<ti) list.insertBefore(src,item.nextSibling);
+        else list.insertBefore(src,item);
+        onUpdate();
+      }
+    });
+  });
+  onUpdate();
+}
+function checkQ2(){
+  const list=document.getElementById('drag-list');
+  const order=[...list.querySelectorAll('[draggable="true"]')].map(i=>i.dataset.id);
+  const correct=JSON.stringify(order)===JSON.stringify(CORRECT_Q2);
+  if(correct){
+    showFeedback('q2-feedback',true,
+      'Верно! Классическая структура нагнетания страха: сначала предчувствие угрозы, потом нарастающее напряжение, затем клаустрофобия замкнутого пространства, и наконец — взрывной ужас атаки. Режиссёр Ренни Харлин мастерски выстраивал эту лестницу эмоций.');
+    markDot(1,true);
+  } else {
+    showFeedback('q2-feedback',false,
+      'Не совсем. Правильный порядок по убыванию интенсивности: Ужас (атака) → Клаустрофобия (ловушка) → Напряжение (ожидание) → Предчувствие (силуэт). Ужас — самая острая реакция, предчувствие — самая мягкая.');
+    markDot(1,false);
+  }
+  goNext(1);
+}
+
+// ── Q3: TEXT — скорость акулы ──
+function checkQ3(){
+  const raw=document.getElementById('q3-input').value;
+  const v=parseFloat(norm(raw));
+  // 50м / 4с = 12.5 м/с * 3.6 = 45 км/ч
+  const correct=Math.abs(v-45)<=1;
+  if(correct){
+    showFeedback('q3-feedback',true,
+      'Верно! 50 м ÷ 4 с = 12,5 м/с. Умножаем на 3,6 = 45 км/ч. Реальная акула-мако — самая быстрая акула в мире — развивает до 74 км/ч в рывке. Скорость в фильме немного занижена!');
+    markDot(2,true);
+  } else {
+    showFeedback('q3-feedback',false,
+      'Не верно. Считаем: 50 м ÷ 4 с = 12,5 м/с → × 3,6 = 45 км/ч. Реальные акулы-мако способны разгоняться до 74 км/ч — они быстрее киношных.');
+    markDot(2,false);
+  }
+  goNext(2);
+}
+
+// ── Q4: CHOICE ──
+function checkQ4(btn,isCorrect){
+  document.querySelectorAll('#q4-choices .choice-btn').forEach(b=>b.disabled=true);
+  if(isCorrect){
+    btn.classList.add('selected-correct');
+    showFeedback('q4-feedback',true,
+      'Верно! Дельфины-афалины достигают 55 км/ч, акулы-мако — около 45 км/ч. По скорости они близки, но по интеллекту — пропасть: мозг дельфина пропорционально тела один из крупнейших среди млекопитающих. Акулы умны для рыб, но не для приматов.');
+    markDot(3,true);
+  } else {
+    btn.classList.add('selected-wrong');
+    document.querySelectorAll('#q4-choices .choice-btn').forEach(b=>{
+      if(b.getAttribute('onclick').includes('true')) b.classList.add('reveal-correct');
+    });
+    showFeedback('q4-feedback',false,
+      'Не верно. Дельфины незначительно быстрее акул, но существенно умнее. Фильм гиперболизирует когнитивные способности акул для драматического эффекта.');
+    markDot(3,false);
+  }
+  goNext(3);
+}
+
+// ── Q5: DRAG — алгоритм ──
+const CORRECT_Q5=['detect','size','distance','alert','escape'];
+function checkQ5(){
+  const list=document.getElementById('algo-list');
+  const order=[...list.querySelectorAll('[draggable="true"]')].map(i=>i.dataset.id);
+  const correct=JSON.stringify(order)===JSON.stringify(CORRECT_Q5);
+  if(correct){
+    showFeedback('q5-feedback',true,
+      'Верно! Логика алгоритма: сначала обнаружить угрозу, потом оценить её опасность, рассчитать расстояние и динамику, и только потом — оповещение и маршрут. Пропуск любого шага снизит эффективность системы.');
+    markDot(4,true);
+  } else {
+    showFeedback('q5-feedback',false,
+      'Не совсем. Правильный порядок: 1) Обнаружение → 2) Оценка вида/размера → 3) Расчёт расстояния → 4) Оповещение → 5) Маршрут эвакуации. Алгоритм должен идти от анализа данных к действию.');
+    markDot(4,false);
+  }
+  goNext(4);
+}
+
+// ── RESULT ──
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  const rs=document.getElementById('result-screen');
+  rs.style.display='block';
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+  const c=score.filter(v=>v===true).length;
+  const pct=Math.round((c/TOTAL)*100);
+  document.getElementById('result-percent').textContent=pct+'%';
+  document.getElementById('result-score').textContent=c+' из '+TOTAL+' верных ответов';
+  let emoji,title,msg;
+  if(pct>=80){
+    emoji='🦈'; title='Ихтиолог-выживальщик';
+    msg='Ты знаешь акул лучше, чем персонажи фильма. Научные знания — лучшее оружие против хаоса. Даже доктор Сьюзан МакАлистер оценила бы твои знания.';
+  } else if(pct>=60){
+    emoji='🐬'; title='Морской биолог-новичок';
+    msg='Хорошие базовые знания о морской жизни! Несколько деталей ускользнули, но ты определённо выжил бы на исследовательской станции.';
+  } else {
+    emoji='💧'; title='Добыча глубины';
+    msg='Акулы оказались хитрее. Но это лишь повод глубже погрузиться в морскую биологию — и следующий раз ты выплывешь на поверхность победителем.';
+  }
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-message').textContent=msg;
+  updateCanvas(c,pct);
+}
+
+// ── CERTIFICATE ──
+const CERT_B64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAJ5A4sDASIAAhEBAxEB/8QAHQAAAQQDAQEAAAAAAAAAAAAAAAMEBQYBAgcICf/EAFcQAAIABAQDBAUIBgYJAwMACwECAAMEEQUGEiEHMUETIlFhFDJxgZEIFSNCobHB0RZScpLh8BckM1NUYiU0NUOCorLS8WNzwiZ0kzZk4kZlhAkYJ0SU';
+
+let certImg=null;
+function initCertImg(cb){
+  if(certImg&&certImg.complete&&certImg.naturalWidth){cb();return;}
+  certImg=new Image();
+  certImg.onload=cb;
+  certImg.src='data:image/jpeg;base64,'+CERT_B64;
+}
+
+function updateCanvas(correct,pct){
+  const c=score.filter(v=>v===true).length;
+  const p=Math.round((c/TOTAL)*100);
+  correct=correct!==undefined?correct:c;
+  pct=pct!==undefined?pct:p;
+  const firstName=(document.getElementById('name-first')?.value||'').trim();
+  const lastName=(document.getElementById('name-last')?.value||'').trim();
+  const fullName=[firstName,lastName].filter(Boolean).join(' ');
+  const canvas=document.getElementById('cert-canvas');
+  if(!canvas) return;
+  const IW=1600,IH=900;
+  canvas.width=IW;canvas.height=IH;
+  const ctx=canvas.getContext('2d');
+
+  function render(){
+    ctx.clearRect(0,0,IW,IH);
+
+    // Background gradient — deep blue ocean
+    const bgGrad=ctx.createLinearGradient(0,0,0,IH);
+    bgGrad.addColorStop(0,'#0a1628');
+    bgGrad.addColorStop(0.5,'#0d3b5e');
+    bgGrad.addColorStop(1,'#051020');
+    ctx.fillStyle=bgGrad;
+    ctx.fillRect(0,0,IW,IH);
+
+    // Underwater light rays
+    ctx.save();
+    ctx.globalAlpha=0.07;
+    for(let i=0;i<8;i++){
+      const x=100+i*200;
+      const grad=ctx.createLinearGradient(x,0,x+60,IH);
+      grad.addColorStop(0,'rgba(100,200,255,0.8)');
+      grad.addColorStop(1,'rgba(100,200,255,0)');
+      ctx.fillStyle=grad;
+      ctx.beginPath();
+      ctx.moveTo(x,0);
+      ctx.lineTo(x+120,0);
+      ctx.lineTo(x+60+120,IH);
+      ctx.lineTo(x-60,IH);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Decorative border
+    ctx.strokeStyle='rgba(100,190,240,0.4)';
+    ctx.lineWidth=4;
+    ctx.strokeRect(30,30,IW-60,IH-60);
+    ctx.strokeStyle='rgba(100,190,240,0.15)';
+    ctx.lineWidth=1;
+    ctx.strokeRect(45,45,IW-90,IH-90);
+
+    // Corner decorations
+    const corners=[[60,60],[IW-60,60],[60,IH-60],[IW-60,IH-60]];
+    corners.forEach(([cx,cy])=>{
+      ctx.strokeStyle='rgba(100,190,240,0.5)';
+      ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(cx,cy,20,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,cy,12,0,Math.PI*2);ctx.stroke();
+    });
+
+    // Shark emoji / icon area
+    ctx.font='80px serif';
+    ctx.textAlign='center';
+    ctx.fillText('🦈',IW/2,160);
+
+    // Title
+    ctx.fillStyle='rgba(100,200,255,0.9)';
+    ctx.font='bold 28px Georgia,serif';
+    ctx.textAlign='center';
+    ctx.letterSpacing='8px';
+    ctx.fillText('КИНЕМАТОГРАФИЧЕСКАЯ АРТЕФАКТОЛОГИЯ',IW/2,230);
+
+    // Main title
+    ctx.fillStyle='#ffffff';
+    ctx.font='bold 48px Georgia,serif';
+    ctx.fillText('«ГЛУБОКОЕ СИНЕЕ МОРЕ»',IW/2,300);
+
+    // Subtitle
+    ctx.fillStyle='rgba(160,220,255,0.8)';
+    ctx.font='italic 24px Georgia,serif';
+    ctx.fillText('vs Реальная наука об акулах',IW/2,345);
+
+    // Divider line
+    const lineGrad=ctx.createLinearGradient(200,0,IW-200,0);
+    lineGrad.addColorStop(0,'transparent');
+    lineGrad.addColorStop(0.5,'rgba(100,190,240,0.8)');
+    lineGrad.addColorStop(1,'transparent');
+    ctx.strokeStyle=lineGrad;
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(200,370);ctx.lineTo(IW-200,370);ctx.stroke();
+
+    // Certificate text
+    ctx.fillStyle='rgba(180,220,255,0.7)';
+    ctx.font='20px Georgia,serif';
+    ctx.fillText('НАСТОЯЩИМ ПОДТВЕРЖДАЕТСЯ, ЧТО',IW/2,420);
+
+    // Name area
+    const nameAreaY=460;
+    const nameAreaH=80;
+    if(fullName){
+      const words=fullName.split(' ');
+      let fs=Math.round(nameAreaH*0.55);
+      function getLines(fontSize){
+        ctx.font=`bold italic ${fontSize}px Georgia,serif`;
+        const lh=fontSize*1.2;const ls=[];let l='';
+        const maxW=IW*0.7;
+        for(const w of words){
+          const t=l?l+' '+w:w;
+          if(ctx.measureText(t).width>maxW&&l){ls.push(l);l=w;}
+          else l=t;
+        }
+        if(l) ls.push(l);return ls;
+      }
+      let lines=getLines(fs);
+      while(fs>16){
+        if(lines.length*(fs*1.2)<=nameAreaH) break;
+        fs-=2;lines=getLines(fs);
+      }
+      ctx.font=`bold italic ${fs}px Georgia,serif`;
+      ctx.fillStyle='rgba(255,255,255,0.15)';
+      const lh=fs*1.2;
+      const totalH=(lines.length-1)*lh;
+      const startY=nameAreaY+nameAreaH/2-totalH/2;
+      lines.forEach((l,i)=>ctx.fillText(l,IW/2+2,startY+i*lh+2));
+      ctx.fillStyle='#ffffff';
+      lines.forEach((l,i)=>ctx.fillText(l,IW/2,startY+i*lh));
+    } else {
+      ctx.font='italic 26px Georgia,serif';
+      ctx.fillStyle='rgba(100,190,240,0.4)';
+      ctx.fillText('[ Введи имя и фамилию ]',IW/2,nameAreaY+nameAreaH/2);
+    }
+
+    // Underline for name
+    ctx.strokeStyle='rgba(100,190,240,0.5)';
+    ctx.lineWidth=1;
+    ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(300,nameAreaY+nameAreaH+10);ctx.lineTo(IW-300,nameAreaY+nameAreaH+10);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Score area
+    const scoreY=580;
+    ctx.fillStyle='rgba(100,190,240,0.12)';
+    ctx.beginPath();
+    ctx.roundRect(IW/2-200,scoreY-30,400,80,12);
+    ctx.fill();
+    ctx.strokeStyle='rgba(100,190,240,0.3)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    ctx.fillStyle='rgba(180,220,255,0.8)';
+    ctx.font='18px Georgia,serif';
+    ctx.fillText('РЕЗУЛЬТАТ ТЕСТА',IW/2,scoreY);
+    ctx.fillStyle='#ffffff';
+    ctx.font='bold 42px Georgia,serif';
+    ctx.fillText(pct+'%',IW/2,scoreY+50);
+
+    // Bottom info
+    const divGrad2=ctx.createLinearGradient(200,0,IW-200,0);
+    divGrad2.addColorStop(0,'transparent');
+    divGrad2.addColorStop(0.5,'rgba(100,190,240,0.6)');
+    divGrad2.addColorStop(1,'transparent');
+    ctx.strokeStyle=divGrad2;
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(200,690);ctx.lineTo(IW-200,690);ctx.stroke();
+
+    ctx.fillStyle='rgba(120,180,220,0.6)';
+    ctx.font='16px Georgia,serif';
+    ctx.fillText('Deep Blue Sea • Наука против кино • '+new Date().getFullYear(),IW/2,730);
+
+    ctx.fillStyle='rgba(100,160,200,0.5)';
+    ctx.font='italic 14px Georgia,serif';
+    ctx.fillText('🦈  Та ещё акула в науке  🦈',IW/2,760);
+
+    // Bubbles decoration
+    ctx.save();
+    ctx.globalAlpha=0.15;
+    for(let i=0;i<15;i++){
+      const bx=50+Math.sin(i*137)*IW*0.45+IW/2;
+      const by=800+Math.cos(i*137)*60;
+      const br=3+Math.sin(i*57)*4;
+      ctx.strokeStyle='rgba(150,210,255,0.8)';
+      ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  render();
+}
+
+function downloadImg(){
+  updateCanvas();
+  const canvas=document.getElementById('cert-canvas');
+  const link=document.createElement('a');
+  link.download='deep_blue_sea_certificate.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+function shareToTelegram(){
+  updateCanvas();
+  document.getElementById('cert-canvas').toBlob(blob=>{
+    if(navigator.share&&navigator.canShare){
+      const file=new File([blob],'certificate.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'Глубокое синее море vs Наука'}).catch(()=>{});
+        return;
+      }
+    }
+    window.open('https://t.me/share/url?url=&text='+encodeURIComponent('Я прошёл(а) тест «Глубокое синее море» 🦈 Проверь себя!'),'_blank');
+  },'image/png');
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  initDrag();
+  const q3=document.getElementById('q3-input');
+  if(q3) q3.addEventListener('keydown',e=>{if(e.key==='Enter') document.querySelector('#q3 .btn').click();});
+});
+</script>
+</body>
+</html>
